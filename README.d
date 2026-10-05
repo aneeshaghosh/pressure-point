@@ -101,15 +101,15 @@ Dark patterns can be subtle. A countdown, an extra fee, a highlighted button, or
 
 We wanted to build a tool that makes these patterns easier to see, understand, and question.
 
-TEAM
+TEAM BEYOND BINARY
 
-Built by a team of first-year B.Tech CSE students at VIT Chennai.
+Built by a team of first-year B.Tech students at VIT Chennai.
 
-Aneesha Ghosh – AI / Gemma and detection pipeline
+Aneesha Ghosh 
 
-Shridula.V- Frontend – React and UI
+Shridula.V
 
-Srivarshini.S- Backend – FastAPI and API integration
+Srivarshini.S
 
 HACK DAY
 
