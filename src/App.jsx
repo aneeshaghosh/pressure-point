@@ -1,5 +1,5 @@
-import React from "react";
-import { useState } from "react";
+
+import React, { useState } from "react";
 import "./App.css";
 
 const demos = [
@@ -8,84 +8,118 @@ const demos = [
     type: "Shopping",
     icon: "🛍️",
     color: "orange",
-    score: 91,
-    title: "MEGA SUMMER SALE",
-    subtitle: "Everything you love, at special prices!",
-    findings: [
-      "Countdown timer creates urgency",
-      "Limited-stock message may pressure users",
-      "Bright discount button draws attention"
-    ]
   },
   {
     name: "Travel Booking",
     type: "Travel",
     icon: "✈️",
     color: "cyan",
-    score: 76,
-    title: "BOOK YOUR DREAM TRIP",
-    subtitle: "Your perfect holiday is waiting!",
-    findings: [
-      "Only 2 rooms left message",
-      "Price increase warning",
-      "Urgency-focused booking button"
-    ]
   },
   {
     name: "Subscription",
     type: "Streaming",
     icon: "🎬",
     color: "pink",
-    score: 68,
-    title: "CHOOSE YOUR PLAN",
-    subtitle: "Start watching today",
-    findings: [
-      "Premium option receives visual emphasis",
-      "Free option is less prominent",
-      "Trial language may encourage quick decisions"
-    ]
   },
   {
     name: "Concert Tickets",
     type: "Events",
     icon: "🎟️",
     color: "green",
-    score: 84,
-    title: "LIVE MUSIC TONIGHT",
-    subtitle: "Don't miss the experience!",
-    findings: [
-      "Ticket availability warning",
-      "Countdown creates urgency",
-      "Large purchase button"
-    ]
-  }
+  },
 ];
+
+const formatType = (type) => {
+  if (!type) return "Pattern detected";
+
+  return type
+    .split("_")
+    .map(
+      (word) => word.charAt(0).toUpperCase() + word.slice(1)
+    )
+    .join(" ");
+};
 
 function App() {
   const [selected, setSelected] = useState(demos[0]);
+
   const [scanning, setScanning] = useState(false);
+
   const [showResults, setShowResults] = useState(false);
+
   const [activeFinding, setActiveFinding] = useState(0);
+
   const [uploadedImage, setUploadedImage] = useState(null);
+
+  const [selectedFile, setSelectedFile] = useState(null);
+
+  const [findings, setFindings] = useState([]);
+
+  const [error, setError] = useState("");
 
   const handleUpload = (event) => {
     const file = event.target.files[0];
 
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setUploadedImage(imageUrl);
-      setShowResults(false);
-    }
+    if (!file) return;
+
+    const imageUrl = URL.createObjectURL(file);
+
+    setUploadedImage(imageUrl);
+    setSelectedFile(file);
+
+    setShowResults(false);
+    setFindings([]);
+    setError("");
   };
 
-  const runScan = () => {
+  const runScan = async () => {
+    if (!selectedFile) {
+      setError("Please upload a screenshot first.");
+      return;
+    }
+
     setScanning(true);
     setShowResults(false);
+    setFindings([]);
+    setError("");
 
-    setTimeout(() => {
-      setScanning(false);
+    try {
+      const formData = new FormData();
+
+      formData.append("file", selectedFile);
+
+      const response = await fetch(
+        "http://127.0.0.1:8000/analyze",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Backend analysis failed.");
+      }
+
+      const result = await response.json();
+
+      console.log("AI RESULT:", result);
+
+      const detectedFindings = result.findings || [];
+
+      setFindings(detectedFindings);
+
+      setActiveFinding(0);
+
       setShowResults(true);
-    }, 1800);
+    } catch (err) {
+      console.error(err);
+
+      setError(
+        "Unable to analyze the screenshot. Make sure the backend is running."
+      );
+    } finally {
+      setScanning(false);
+    }
   };
 
   return (
@@ -100,7 +134,10 @@ function App() {
       <header className="header">
 
         <div className="brand">
-          <div className="brand-mark">🎯</div>
+
+          <div className="brand-mark">
+            🎯
+          </div>
 
           <div>
             <div className="brand-name">
@@ -111,11 +148,15 @@ function App() {
               AI INTERFACE ANALYZER
             </div>
           </div>
+
         </div>
 
         <div className="header-pill">
+
           <span className="live-dot"></span>
+
           AI SCANNER ONLINE
+
         </div>
 
       </header>
@@ -181,11 +222,13 @@ function App() {
 
         {/* UPLOADED IMAGE */}
         {uploadedImage && (
+
           <section className="uploaded-section">
 
             <div className="uploaded-header">
 
               <div>
+
                 <span className="small-label">
                   UPLOADED SCREENSHOT
                 </span>
@@ -193,6 +236,7 @@ function App() {
                 <h2>
                   Your Interface
                 </h2>
+
               </div>
 
               <span className="image-ready">
@@ -210,14 +254,39 @@ function App() {
               />
 
               {scanning && (
+
                 <div className="upload-scan-line">
-                  <span>AI SCANNING...</span>
+
+                  <span>
+                    AI SCANNING...
+                  </span>
+
                 </div>
+
               )}
 
             </div>
 
           </section>
+
+        )}
+
+        {/* ERROR */}
+        {error && (
+
+          <div
+            style={{
+              marginTop: "20px",
+              padding: "15px",
+              borderRadius: "10px",
+              background: "#ffeded",
+              color: "#b00020",
+              textAlign: "center",
+            }}
+          >
+            {error}
+          </div>
+
         )}
 
         {/* EXAMPLES */}
@@ -257,15 +326,18 @@ function App() {
                 onClick={() => {
                   setSelected(demo);
                   setShowResults(false);
+                  setFindings([]);
                 }}
               >
 
                 <div className="mini-browser">
 
                   <div className="browser-dots">
+
                     <span></span>
                     <span></span>
                     <span></span>
+
                   </div>
 
                   <div className="mini-content">
@@ -275,8 +347,10 @@ function App() {
                     </div>
 
                     <div className="mini-lines">
+
                       <span></span>
                       <span></span>
+
                     </div>
 
                     <div className="mini-product">
@@ -286,9 +360,11 @@ function App() {
                       </div>
 
                       <div className="product-text">
+
                         <span></span>
                         <span></span>
                         <span></span>
+
                       </div>
 
                     </div>
@@ -312,6 +388,7 @@ function App() {
                 <div className="gallery-info">
 
                   <div>
+
                     <strong>
                       {demo.name}
                     </strong>
@@ -319,6 +396,7 @@ function App() {
                     <small>
                       {demo.type}
                     </small>
+
                   </div>
 
                   <span className="arrow">
@@ -354,7 +432,9 @@ function App() {
                 </h2>
 
                 <p>
-                  Selected: {selected.name}
+                  {uploadedImage
+                    ? "Uploaded screenshot"
+                    : "Upload a screenshot to begin"}
                 </p>
 
               </div>
@@ -362,242 +442,173 @@ function App() {
               <div className="risk-badge">
 
                 <span>
-                  RISK
+                  FINDINGS
                 </span>
 
                 <strong>
-                  {selected.score}
+                  {findings.length}
                 </strong>
 
               </div>
 
             </div>
 
-            <div
-              className={`mock-website ${selected.color}`}
-            >
+            <div className="mock-website">
 
-              <div className="fake-browser">
+              {uploadedImage ? (
 
-                <div className="browser-controls">
-                  <span></span>
-                  <span></span>
-                  <span></span>
+                <div
+                  className="real-image-container"
+                  style={{
+                    position: "relative",
+                  }}
+                >
+
+                  <img
+                    src={uploadedImage}
+                    alt="Analyzed interface"
+                    style={{
+                      width: "100%",
+                      display: "block",
+                    }}
+                  />
+
+                  {showResults &&
+                    findings.map((finding, index) => {
+
+                      if (!finding.location) return null;
+
+                      return (
+                        <button
+                          key={index}
+                          className={`hotspot ${
+                            activeFinding === index
+                              ? "active"
+                              : ""
+                          }`}
+                          style={{
+                            position: "absolute",
+                            left: `${finding.location.x}px`,
+                            top: `${finding.location.y}px`,
+                            width: `${finding.location.width}px`,
+                            height: `${finding.location.height}px`,
+                          }}
+                          onClick={() =>
+                            setActiveFinding(index)
+                          }
+                        >
+                          {String(index + 1).padStart(2, "0")}
+                        </button>
+                      );
+
+                    })}
+
                 </div>
 
-                <div className="address-bar">
-                  example.com
-                </div>
+              ) : (
 
-                <div className="browser-menu">
-                  ☰
-                </div>
+                <div className={`mock-website-placeholder ${selected.color}`}>
 
-              </div>
+                  <div className="fake-browser">
 
-              <div className="fake-page">
+                    <div className="browser-controls">
 
-                <nav className="fake-nav">
+                      <span></span>
+                      <span></span>
+                      <span></span>
 
-                  <strong>
-                    {selected.icon} BRAND
-                  </strong>
-
-                  <div>
-                    Home&nbsp;&nbsp;
-                    Products&nbsp;&nbsp;
-                    Deals
-                  </div>
-
-                  <button>
-                    Cart 🛒
-                  </button>
-
-                </nav>
-
-                <div className="fake-hero">
-
-                  <div className="hero-copy">
-
-                    <div className="fake-tag">
-                      ⭐ SPECIAL OFFER
                     </div>
 
-                    <h3>
-                      {selected.title}
-                    </h3>
+                    <div className="address-bar">
+                      example.com
+                    </div>
 
-                    <p>
-                      {selected.subtitle}
-                    </p>
+                    <div className="browser-menu">
+                      ☰
+                    </div>
 
-                    <div className="fake-price">
+                  </div>
+
+                  <div className="fake-page">
+
+                    <nav className="fake-nav">
 
                       <strong>
-                        ₹1,499
+                        {selected.icon} BRAND
                       </strong>
 
-                      <del>
-                        ₹2,999
-                      </del>
+                      <div>
+                        Home&nbsp;&nbsp;
+                        Products&nbsp;&nbsp;
+                        Deals
+                      </div>
 
-                    </div>
+                      <button>
+                        Cart 🛒
+                      </button>
 
-                    <button className="fake-buy">
+                    </nav>
 
-                      {selected.type === "Shopping"
-                        ? "GET IT NOW →"
-                        : selected.type === "Travel"
-                        ? "BOOK NOW →"
-                        : selected.type === "Streaming"
-                        ? "START WATCHING →"
-                        : "BUY TICKETS →"}
+                    <div className="fake-hero">
 
-                    </button>
+                      <div className="hero-copy">
 
-                  </div>
+                        <div className="fake-tag">
+                          ⭐ SPECIAL OFFER
+                        </div>
 
-                  <div className="graphic-object">
+                        <h3>
+                          {selected.name}
+                        </h3>
 
-                    <div className="graphic-circle">
-                      {selected.icon}
-                    </div>
+                        <p>
+                          Select an image above to analyze it.
+                        </p>
 
-                    <div className="floating-star star-one">
-                      ✦
-                    </div>
+                      </div>
 
-                    <div className="floating-star star-two">
-                      ★
-                    </div>
-
-                    <div className="floating-star star-three">
-                      ✧
                     </div>
 
                   </div>
 
                 </div>
 
-                <div className="pressure-row">
+              )}
 
-                  <div className="pressure-box">
+              {scanning && (
 
-                    <span>🔥</span>
+                <div className="scan-line">
 
-                    <strong>
-                      Only 2 left!
-                    </strong>
-
-                    <small>
-                      Almost gone
-                    </small>
-
-                  </div>
-
-                  <div className="pressure-box countdown">
-
-                    <span>⏰</span>
-
-                    <strong>
-                      09:42
-                    </strong>
-
-                    <small>
-                      Offer ends soon
-                    </small>
-
-                  </div>
-
-                  <div className="pressure-box">
-
-                    <span>👥</span>
-
-                    <strong>
-                      17 people
-                    </strong>
-
-                    <small>
-                      viewing this
-                    </small>
-
-                  </div>
+                  <span>
+                    AI SCANNING...
+                  </span>
 
                 </div>
 
-                {scanning && (
-                  <div className="scan-line">
-                    <span>
-                      AI SCANNING...
-                    </span>
-                  </div>
-                )}
-
-                {showResults && (
-
-                  <>
-                    <button
-                      className={`hotspot hotspot-one ${
-                        activeFinding === 0
-                          ? "active"
-                          : ""
-                      }`}
-                      onClick={() =>
-                        setActiveFinding(0)
-                      }
-                    >
-                      01
-                    </button>
-
-                    <button
-                      className={`hotspot hotspot-two ${
-                        activeFinding === 1
-                          ? "active"
-                          : ""
-                      }`}
-                      onClick={() =>
-                        setActiveFinding(1)
-                      }
-                    >
-                      02
-                    </button>
-
-                    <button
-                      className={`hotspot hotspot-three ${
-                        activeFinding === 2
-                          ? "active"
-                          : ""
-                      }`}
-                      onClick={() =>
-                        setActiveFinding(2)
-                      }
-                    >
-                      03
-                    </button>
-                  </>
-
-                )}
-
-              </div>
+              )}
 
             </div>
 
             <button
               className="scan-button"
               onClick={runScan}
-              disabled={scanning}
+              disabled={scanning || !selectedFile}
             >
 
               {scanning ? (
+
                 <>
                   <span className="button-spinner"></span>
                   AI IS SCANNING...
                 </>
+
               ) : (
+
                 <>
                   🔍 RUN AI SCAN
                   <span>→</span>
                 </>
+
               )}
 
             </button>
@@ -624,11 +635,11 @@ function App() {
               <div className="score-circle">
 
                 <strong>
-                  {selected.score}
+                  {findings.length}
                 </strong>
 
                 <span>
-                  /100
+                  found
                 </span>
 
               </div>
@@ -648,8 +659,28 @@ function App() {
                 </h3>
 
                 <p>
-                  Run the AI scan to reveal potentially
-                  manipulative interface patterns.
+                  Upload a screenshot and run the AI scan
+                  to reveal potentially manipulative
+                  interface patterns.
+                </p>
+
+              </div>
+
+            ) : findings.length === 0 ? (
+
+              <div className="waiting">
+
+                <div className="waiting-icon">
+                  🛡️
+                </div>
+
+                <h3>
+                  No patterns detected
+                </h3>
+
+                <p>
+                  No potentially manipulative interface
+                  patterns were detected in this screenshot.
                 </p>
 
               </div>
@@ -658,45 +689,55 @@ function App() {
 
               <div className="findings">
 
-                {selected.findings.map(
-                  (finding, index) => (
+                {findings.map((finding, index) => (
 
-                    <button
-                      key={finding}
-                      className={`finding ${
-                        activeFinding === index
-                          ? "active-finding"
-                          : ""
-                      }`}
-                      onClick={() =>
-                        setActiveFinding(index)
-                      }
-                    >
+                  <button
+                    key={index}
+                    className={`finding ${
+                      activeFinding === index
+                        ? "active-finding"
+                        : ""
+                    }`}
+                    onClick={() =>
+                      setActiveFinding(index)
+                    }
+                  >
 
-                      <div className="finding-number">
-                        0{index + 1}
-                      </div>
+                    <div className="finding-number">
+                      {String(index + 1).padStart(2, "0")}
+                    </div>
 
-                      <div className="finding-content">
+                    <div className="finding-content">
 
-                        <strong>
-                          {finding}
-                        </strong>
+                      <strong>
+                        {formatType(finding.type)}
+                      </strong>
 
-                        <p>
-                          Potential influence pattern detected
-                        </p>
+                      <p>
+                        {finding.evidence}
+                      </p>
 
-                      </div>
+                      <small>
+                        {finding.explanation}
+                      </small>
 
-                      <span className="finding-arrow">
-                        →
-                      </span>
+                      <small>
+                        Confidence:{" "}
+                        {Math.round(
+                          (finding.confidence || 0) * 100
+                        )}
+                        %
+                      </small>
 
-                    </button>
+                    </div>
 
-                  )
-                )}
+                    <span className="finding-arrow">
+                      →
+                    </span>
+
+                  </button>
+
+                ))}
 
               </div>
 
@@ -704,6 +745,25 @@ function App() {
 
           </div>
 
+        </section>
+
+        {/* DISCLAIMER */}
+        <section
+          style={{
+            marginTop: "30px",
+            padding: "18px 22px",
+            borderRadius: "14px",
+            background: "rgba(255,255,255,0.05)",
+            border: "1px solid rgba(255,255,255,0.1)",
+            fontSize: "13px",
+            lineHeight: "1.6",
+            opacity: 0.8,
+          }}
+        >
+          <strong>Note:</strong> Pressure Point identifies potentially
+          manipulative interface patterns based on observable visual
+          and textual evidence. Detection does not establish deceptive
+          intent.
         </section>
 
         {/* STATS */}
@@ -714,7 +774,7 @@ function App() {
             <span>🎯</span>
 
             <div>
-              <strong>3</strong>
+              <strong>{findings.length}</strong>
               <small>Patterns detected</small>
             </div>
 
@@ -736,8 +796,10 @@ function App() {
             <span>⚡</span>
 
             <div>
-              <strong>LIVE</strong>
-              <small>Interactive scanning</small>
+              <strong>
+                {scanning ? "SCAN" : "READY"}
+              </strong>
+              <small>Analysis status</small>
             </div>
 
           </div>

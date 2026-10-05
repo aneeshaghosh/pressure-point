@@ -5,7 +5,7 @@ from google import genai
 from PIL import Image
 from prompt import DARK_PATTERN_PROMPT
 
-load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env"))
 
 api_key = os.getenv("GEMINI_API_KEY")
 
