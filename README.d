@@ -1,106 +1,118 @@
-PRESSURE POINT 🔍
+PRESSURE POINT
 
-Exposing the Hidden Psychology of Digital Interfaces
+Exposing the hidden psychology of digital interfaces
 
-PRESSURE POINT is an AI-powered tool that analyzes digital interfaces and identifies potentially manipulative design patterns that can influence users' decisions.
+Pressure Point is an AI-powered tool that analyzes screenshots of websites and digital interfaces to identify potentially manipulative design patterns.
 
-From countdown timers and limited-stock messages to pricing and urgency-based techniques, PRESSURE POINT helps users understand the psychological techniques used in digital interfaces.
+We built it around a simple question:
 
-🚀 Features
+Can an interface push users toward a decision without them realizing it?
 
-- 📸 Upload screenshots of websites or digital interfaces
-- 🤖 AI-powered interface analysis
-- 🔍 Detects potentially manipulative design patterns
-- 📊 Provides a pressure/manipulation score
-- 💡 Explains the detected patterns in simple language
-- 🎨 Interactive and user-friendly interface
+Pressure Point looks at the visible text and visual elements in an interface and identifies patterns that may create pressure or influence user decisions. It also points to the relevant part of the screenshot and explains why it was flagged.
 
-🧠 What Does It Detect?
+WHAT IT DETECTS
 
-PRESSURE POINT can identify patterns such as:
+Artificial Urgency – Countdown timers and limited-time messages that create time pressure.
 
-- ⏳ Countdown timers
-- ⚠️ Urgency messages
-- 📦 Limited-stock claims
-- 💰 Pricing pressure
-- 🛒 Aggressive sales techniques
-- 🔔 Repeated prompts and notifications
-- 👥 Social-proof techniques
+Scarcity Pressure – Messages such as "Only 2 left" or indicators suggesting high demand.
 
-⚙️ How It Works
+Hidden Charges – Additional fees that appear later during a purchase or checkout process.
 
-User uploads screenshot
-        ↓
-Frontend
-        ↓
-Backend API
-        ↓
-AI Model
-        ↓
-Interface Analysis
-        ↓
-Results + Pressure Score
-        ↓
-Frontend displays results
+Difficult Opt-Out – When accepting an option is made much more prominent or easier than declining it.
 
-🛠️ Tech Stack
+Misleading Visual Emphasis – When one comparable option is given substantially more visual prominence than another.
 
-Frontend
+HOW IT WORKS
 
-- React
-- JavaScript
-- CSS
-- Vite
+A screenshot is uploaded through the React frontend.
 
-Backend
+The image is sent to our FastAPI backend.
 
-- Python
-- FastAPI
+The backend passes the screenshot to Gemma along with our detection prompt.
 
-AI
+Gemma analyzes the interface and returns structured JSON containing the detected patterns, evidence, explanations, confidence scores, and approximate locations.
 
-- Google AI API
-- Gemini / Gemma
+The frontend then displays the findings and highlights the relevant elements on the screenshot.
 
-📁 Project Structure
+TECH STACK
 
-PRESSURE-POINT/
-│
-├── frontend/
-│ ├── src/
-│ ├── public/
-│ ├── package.json
-│ └── ...
-│
+Frontend: React, Vite, CSS
+
+Backend: Python, FastAPI, Uvicorn
+
+AI: Gemma, Gemini API, Google GenAI SDK
+
+Other: Pillow, JSON, Git and GitHub
+
+PROJECT STRUCTURE
+
+pressure-point/
+├── ai-gemma/
+│ ├── gemma.py
+│ └── prompt.py
 ├── backend/
-│ ├── main.py
-│ └── ...
-│
-└── README.md
+│ └── main.py
+├── src/
+│ ├── App.jsx
+│ ├── App.css
+│ ├── index.css
+│ └── main.jsx
+├── screenshots/
+├── .gitignore
+├── index.html
+├── package.json
+└── package-lock.json
 
-🔄 Application Flow
+RUNNING LOCALLY
 
-1. The user uploads a screenshot.
-2. The frontend sends the image to the backend.
-3. The backend communicates with the AI model through an API.
-4. The AI analyzes the interface.
-5. Potentially manipulative patterns are identified.
-6. The backend sends the analysis back to the frontend.
-7. PRESSURE POINT displays the findings and score to the user.
+Clone the repository and open the project folder.
 
-🎯 Goal
+Create a Python virtual environment and install the required dependencies.
 
-The goal of PRESSURE POINT is to make users more aware of how digital interfaces can influence their decisions and help them make more informed choices online.
+Create a .env file in the project root and add your Gemini API key:
 
-🔮 Future Improvements
+GEMINI_API_KEY=your_api_key_here
 
-- Real-time webpage analysis
-- Browser extension
-- More manipulation-pattern detection
-- Improved AI explanations
-- Accessibility analysis
-- Website-wide analysis instead of only screenshots
+Do not commit the .env file.
 
-👥 Team
+Start the backend using:
 
-Developed as an AI/ML project focused on responsible and transparent digital experiences.
+cd backend
+python -m uvicorn main:app --reload
+
+Then, in another terminal, install the frontend dependencies and start the development server:
+
+npm install
+npm run dev
+
+Open the local Vite URL shown in the terminal.
+
+IMPORTANT LIMITATION
+
+Pressure Point identifies observable interface patterns based on visual and textual evidence. It does not determine the intentions of a company or designer.
+
+A detected pattern does not establish that a company deliberately tried to deceive users.
+
+The confidence score represents confidence that the observable pattern exists, not confidence about the company's intent.
+
+WHY WE BUILT IT
+
+Dark patterns can be subtle. A countdown, an extra fee, a highlighted button, or a difficult-to-find alternative can influence a user's decision without being immediately obvious.
+
+We wanted to build a tool that makes these patterns easier to see, understand, and question.
+
+TEAM
+
+Built by a team of first-year B.Tech CSE students at VIT Chennai.
+
+Aneesha Ghosh – AI / Gemma and detection pipeline
+
+Shridula.V- Frontend – React and UI
+
+Srivarshini.S- Backend – FastAPI and API integration
+
+HACK DAY
+
+Built for Hacktoberfest 2026 Hack Day at VIT Chennai.
+
+This project explores how open-weight AI models can be used to analyze real-world digital interfaces and make their design choices more transparent.
